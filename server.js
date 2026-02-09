@@ -53,10 +53,19 @@ app.use((err, req, res, next) => {
 
 // Start server ONLY if running directly (npm run dev / node server.js)
 if (require.main === module) {
-  const PORT = process.env.PORT || 3001;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running locally at http://localhost:${PORT}`);
-  });
+  const startServer = (port) => {
+    const server = app.listen(port, () => {
+      console.log(`🚀 Server running locally at http://localhost:${port}`);
+    }).on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`⚠️ Port ${port} is in use, trying ${port + 1}...`);
+        startServer(port + 1);
+      } else {
+        console.error('❌ Server error:', err);
+      }
+    });
+  };
+  startServer(process.env.PORT || 3001);
 }
 
 // Export app for serverless deployment
