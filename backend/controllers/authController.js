@@ -59,49 +59,67 @@ exports.register = (req, res) => {
 
 // Login
 exports.login = (req, res) => {
-  const { username, password } = req.body;
+  try {
+    const { username, password } = req.body;
+    console.log(`Login attempt for username: ${username}`);
 
-  if (!username || !password) {
-    return res.status(400).json({ error: true, message: 'Username and password required' });
-  }
-
-  User.findByUsername(username, (err, user) => {
-    if (err) {
-      return res.status(500).json({ error: true, message: err.message });
+    if (!username || !password) {
+      return res.status(400).json({ error: true, message: 'Username and password required' });
     }
 
-    if (!user) {
-      return res.status(401).json({ error: true, message: 'Invalid credentials' });
-    }
-
-    bcrypt.compare(password, user.password, (err, validPassword) => {
+    User.findByUsername(username, (err, user) => {
       if (err) {
-        return res.status(500).json({ error: true, message: err.message });
+        console.error('Database Error in login:', err);
+        return res.status(500).json({ error: true, message: 'Database error occurred', details: err.message });
       }
 
-      if (!validPassword) {
+      if (!user) {
+        console.log('User not found');
         return res.status(401).json({ error: true, message: 'Invalid credentials' });
       }
 
-      const token = jwt.sign(
-        { id: user.id, username: user.username, role: user.role },
-        config.JWT_SECRET,
-        { expiresIn: config.JWT_EXPIRE }
-      );
+      console.log('User found, comparing password...');
+      bcrypt.compare(password, user.password, (err, validPassword) => {
+        if (err) {
+          console.error('Bcrypt Error in login:', err);
+          return res.status(500).json({ error: true, message: 'Password comparison error', details: err.message });
+        }
 
-      res.json({
-        error: false,
-        message: 'Login successful',
-        token,
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role
+        if (!validPassword) {
+          console.log('Password mismatch');
+          return res.status(401).json({ error: true, message: 'Invalid credentials' });
+        }
+
+        console.log('Password valid, signing token...');
+        try {
+          const token = jwt.sign(
+            { id: user.id, username: user.username, role: user.role },
+            config.JWT_SECRET,
+            { expiresIn: config.JWT_EXPIRE }
+          );
+
+          console.log('Login successful');
+          res.json({
+            error: false,
+            message: 'Login successful',
+            token,
+            user: {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              role: user.role
+            }
+          });
+        } catch (jwtErr) {
+          console.error('JWT Error in login:', jwtErr);
+          res.status(500).json({ error: true, message: 'Token creation failed', details: jwtErr.message });
         }
       });
     });
-  });
+  } catch (globalErr) {
+    console.error('Global Error in login controller:', globalErr);
+    res.status(500).json({ error: true, message: 'An unexpected error occurred', details: globalErr.message });
+  }
 };

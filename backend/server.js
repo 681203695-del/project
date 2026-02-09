@@ -12,13 +12,17 @@ const userRoutes = require('./routes/user');
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: "https://condo-care-35vh.vercel.app",
-  credentials: true
-}));
+app.use(cors()); // Allow all for local testing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(require('path').join(__dirname, '../'))); // Serve frontend files from parent dir
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
+app.use(express.static(require('path').join(__dirname, '../')));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -27,12 +31,14 @@ app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
-});
-
-// Test endpoint for frontend check
-app.get('/test', (req, res) => {
-  res.json({ message: 'Hello from Render Backend!' });
+  db.get('SELECT 1', [], (err) => {
+    res.json({
+      status: 'OK',
+      database: err ? 'ERROR' : 'CONNECTED',
+      dbError: err ? err.message : null,
+      message: 'Server is running'
+    });
+  });
 });
 
 // Error handling
