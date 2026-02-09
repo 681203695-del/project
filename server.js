@@ -9,6 +9,8 @@ const authRoutes = require('./routes/auth');
 const reportRoutes = require('./routes/report');
 const userRoutes = require('./routes/user');
 
+const path = require('path');
+
 const app = express();
 
 // Middleware
@@ -18,7 +20,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname)); // Serve frontend files from the current project directory
+app.use(express.static(path.join(__dirname, '.'))); // Serve frontend files from the current project directory
 
 // Routes
 app.use('/api/auth', authRoutes);
