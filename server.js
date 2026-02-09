@@ -44,12 +44,5 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🔗 Access the app at: http://localhost:${PORT}/Test%20(1).html`);
-  });
-}
-
+// Export app for serverless deployment
 module.exports = app;
