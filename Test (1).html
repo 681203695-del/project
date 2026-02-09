@@ -272,26 +272,7 @@ background:#05070c;z-index:9999">
     const KEY_REPORTS = "cc_reports_allinone";
 
     /* ================= API CONFIG ================= */
-    let API_PORT = 5000;
-    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-    const API_BASE = () => isLocal ? `http://localhost:${API_PORT}/api` : `${location.origin}/api`;
-
-    async function detectAPIPort() {
-      console.log("Detecting API port...");
-      // Try port 5000 first
-      try {
-        console.log("Trying port 5000...");
-        const res = await fetch('http://localhost:5000/api/health', { method: 'GET' });
-        if (res.ok) { API_PORT = 5000; console.log('✓ API detected on port 5000'); return; }
-      } catch (e) { console.log("Port 5000 failed:", e.message) }
-      // Try port 5001
-      try {
-        console.log("Trying port 5001...");
-        const res = await fetch('http://localhost:5001/api/health', { method: 'GET' });
-        if (res.ok) { API_PORT = 5001; console.log('✓ API detected on port 5001'); return; }
-      } catch (e) { console.log("Port 5001 failed:", e.message) }
-      console.warn('❌ API port not detected, using 5000 as default');
-    }
+    const API_BASE = () => '/api';
     const USERS = [
       { u: "admin", p: "1234", role: "admin", name: "Admin" },
       { u: "tech", p: "1234", role: "tech", name: "ช่าง" },
