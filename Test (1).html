@@ -355,7 +355,7 @@ background:#05070c;z-index:9999">
         if (userInfo) userInfo.innerText = `${s.name} (${s.role})`;
         applyRole(s.role);
         setupNav();
-        detectAPIPort().then(() => renderAll());
+        renderAll();
         // Trigger first tab
         const firstNav = document.querySelector('.nav-link');
         if (firstNav) firstNav.click();
