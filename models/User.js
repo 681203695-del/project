@@ -1,66 +1,69 @@
-const db = require('../config/database');
+const db = require('../config/db');
 
 class User {
   static create(data, callback) {
     const { username, email, password, firstName, lastName, role } = data;
-    db.run(
-      `INSERT INTO users (username, email, password, firstName, lastName, role) VALUES (?, ?, ?, ?, ?, ?)`,
+    db.query(
+      `INSERT INTO users (username, email, password, "firstName", "lastName", role) 
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
       [username, email, password, firstName, lastName, role || 'user'],
-      function(err) {
+      (err, res) => {
         if (err) return callback(err);
-        User.getById(this.lastID, callback);
+        callback(null, res.rows[0]);
       }
     );
   }
 
   static findByUsername(username, callback) {
-    db.get(
-      `SELECT * FROM users WHERE username = ?`,
+    db.query(
+      `SELECT * FROM users WHERE username = $1`,
       [username],
-      callback
+      (err, res) => callback(err, res?.rows[0])
     );
   }
 
   static findByEmail(email, callback) {
-    db.get(
-      `SELECT * FROM users WHERE email = ?`,
+    db.query(
+      `SELECT * FROM users WHERE email = $1`,
       [email],
-      callback
+      (err, res) => callback(err, res?.rows[0])
     );
   }
 
   static getById(id, callback) {
-    db.get(
-      `SELECT * FROM users WHERE id = ?`,
+    db.query(
+      `SELECT * FROM users WHERE id = $1`,
       [id],
-      callback
+      (err, res) => callback(err, res?.rows[0])
     );
   }
 
   static getAll(callback) {
-    db.all(
-      `SELECT id, username, email, firstName, lastName, role, createdAt FROM users`,
-      callback
+    db.query(
+      `SELECT id, username, email, "firstName", "lastName", role, "createdAt" FROM users`,
+      [],
+      (err, res) => callback(err, res?.rows)
     );
   }
 
   static update(id, data, callback) {
     const { firstName, lastName, email, role } = data;
-    db.run(
-      `UPDATE users SET firstName = ?, lastName = ?, email = ?, role = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
+    db.query(
+      `UPDATE users SET "firstName" = $1, "lastName" = $2, email = $3, role = $4, "updatedAt" = CURRENT_TIMESTAMP 
+       WHERE id = $5 RETURNING *`,
       [firstName, lastName, email, role, id],
-      function(err) {
+      (err, res) => {
         if (err) return callback(err);
-        User.getById(id, callback);
+        callback(null, res.rows[0]);
       }
     );
   }
 
   static delete(id, callback) {
-    db.run(
-      `DELETE FROM users WHERE id = ?`,
+    db.query(
+      `DELETE FROM users WHERE id = $1`,
       [id],
-      callback
+      (err, res) => callback(err)
     );
   }
 }
