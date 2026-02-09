@@ -7,6 +7,9 @@ const dbPath = path.join(__dirname, '../database.db');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('✗ Database connection failed:', err);
+    if (process.env.VERCEL) {
+      console.warn('⚠️ Running on Vercel without persistent SQLite storage.');
+    }
   } else {
     console.log('✓ SQLite connected');
     initializeTables();
