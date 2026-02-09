@@ -272,8 +272,9 @@ background:#05070c;z-index:9999">
     const KEY_REPORTS = "cc_reports_allinone";
 
     /* ================= API CONFIG ================= */
-    let API_PORT = 5000; // Will be detected automatically
-    const API_BASE = () => `http://localhost:${API_PORT}/api`;
+    let API_PORT = 5000;
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    const API_BASE = () => isLocal ? `http://localhost:${API_PORT}/api` : `${location.origin}/api`;
 
     async function detectAPIPort() {
       console.log("Detecting API port...");
